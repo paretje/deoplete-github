@@ -85,5 +85,9 @@ class Source(Base):
                             'menu': x.get('title'),
                             'info': x.get('body')}
                         for x in response]
-                return numbers
+                titles = [{'word': x.get('title'),
+                           'menu': '#' + str(x.get('number', '')),
+                           'info': x.get('body')}
+                           for x in response]
+                return numbers + titles
         return []

@@ -37,8 +37,10 @@ call deoplete#util#set_pattern(
 
 # Usage
 
-In your git commit message, git "#" and you'll get issue numbers with their
-titles beside them, and the issue body in the preview window.
+In your git commit message:
+
+- The prefix "#" will find issue numbers for auto-completion.
+- You can also auto-complete github issue titles.
 
 [fugitive]: https://github.com/tpope/vim-fugitive
 [rhubarb]: https://github.com/tpope/vim-rhubarb

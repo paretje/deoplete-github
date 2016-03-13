@@ -57,10 +57,8 @@ class Source(Base):
 
         self.name = 'github'
         self.mark = '[GH]'
-        self.min_pattern_length = 1
         self.filetypes = ['gitcommit']
-        # self.input_pattern = '#\w+'
-        self.input_pattern = '.+'
+        self.input_pattern = '#\w+'
 
     def gather_candidates(self, context):
         """Gather candidates from github API

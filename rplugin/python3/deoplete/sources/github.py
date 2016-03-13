@@ -23,13 +23,14 @@ def repo_base(vim):
     :returns: API endpoint for current repo
     """
     base = repo_homepage(vim)
-    if re.search('//github\.com/', base) is not None:
-        base = base.replace('//github.com/', '//api.github.com/repos/')
-    else:
-        # I'm not sure how to work this
-        # It's enterprise github, I don't understand vim regex
-        base = "failure"
-        pass
+    if base:
+        if re.search('//github\.com/', base) is not None:
+            base = base.replace('//github.com/', '//api.github.com/repos/')
+        else:
+            # I'm not sure how to work this
+            # It's enterprise github, I don't understand vim regex
+            base = "failure"
+            pass
 
     return base
 
@@ -65,21 +66,26 @@ class Source(Base):
         """Gather candidates from github API
         """
 
-        base = repo_base(self.vim) + '/issues'
-        base_url = urlparse(base)
-        credentials = authenticator(base_url.hostname)
+        base = repo_base(self.vim)
 
-        r = request.Request(base)
-        creds = base64.encodestring(bytes('%s:%s' % (credentials.get('login'), credentials.get('password')), 'utf-8')).strip()
-        r.add_header('Authorization', 'Basic %s' % creds.decode('utf-8'))
+        if base:
+            base = base + '/issues'
 
-        with request.urlopen(r) as req:
-            response_json = req.read().decode('utf-8')
-            response = json.loads(response_json)
+            base_url = urlparse(base)
+            credentials = authenticator(base_url.hostname)
 
-            titles = [x.get('title', '') for x in response]
-            numbers = [{'word': '#' + str(x.get('number', '')),
-                        'menu': x.get('title'),
-                        'info': x.get('body')}
-                    for x in response]
-            return numbers
+            r = request.Request(base)
+            creds = base64.encodestring(bytes('%s:%s' % (credentials.get('login'), credentials.get('password')), 'utf-8')).strip()
+            r.add_header('Authorization', 'Basic %s' % creds.decode('utf-8'))
+
+            with request.urlopen(r) as req:
+                response_json = req.read().decode('utf-8')
+                response = json.loads(response_json)
+
+                titles = [x.get('title', '') for x in response]
+                numbers = [{'word': '#' + str(x.get('number', '')),
+                            'menu': x.get('title'),
+                            'info': x.get('body')}
+                        for x in response]
+                return numbers
+        return []

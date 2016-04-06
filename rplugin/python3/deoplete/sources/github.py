@@ -67,7 +67,7 @@ class Source(Base):
         base = repo_base(self.vim)
 
         if base:
-            base = base + '/issues'
+            base = base + '/issues?per_page=200'
 
             base_url = urlparse(base)
             credentials = authenticator(base_url.hostname)

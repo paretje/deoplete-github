@@ -89,11 +89,11 @@ class Source(Base):
 
                 self._cache[repo] = [{'word': '#' + str(x.get('number', '')),
                                       'menu': x.get('title'),
-                                      'info': x.get('body')}
+                                      'info': x.get('body').replace("\r", "")}
                                      for x in response]
                 self._cache[repo] += [{'word': x.get('title'),
                                        'menu': '#' + str(x.get('number', '')),
-                                       'info': x.get('body')}
+                                       'info': x.get('body').replace("\r", "")}
                                       for x in response]
 
     def gather_candidates(self, context):

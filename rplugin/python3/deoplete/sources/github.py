@@ -84,7 +84,6 @@ class Source(Base):
                 response_json = req.read().decode('utf-8')
                 response = json.loads(response_json)
 
-                titles = [x.get('title', '') for x in response]
                 numbers = [{'word': '#' + str(x.get('number', '')),
                             'menu': x.get('title'),
                             'info': x.get('body')}

@@ -44,6 +44,9 @@ def authenticator(hostname):
     myrc = netrc.netrc()
     authenticator = myrc.authenticators(hostname)
 
+    if authenticator is None:
+        return None
+
     return {'login': authenticator[0],
             'account': authenticator[1],
             'password': authenticator[2]}
@@ -73,8 +76,9 @@ class Source(Base):
             credentials = authenticator(base_url.hostname)
 
             r = request.Request(base)
-            creds = base64.encodestring(bytes('%s:%s' % (credentials.get('login'), credentials.get('password')), 'utf-8')).strip()
-            r.add_header('Authorization', 'Basic %s' % creds.decode('utf-8'))
+            if credentials is not None:
+                creds = base64.encodestring(bytes('%s:%s' % (credentials.get('login'), credentials.get('password')), 'utf-8')).strip()
+                r.add_header('Authorization', 'Basic %s' % creds.decode('utf-8'))
 
             with request.urlopen(r) as req:
                 response_json = req.read().decode('utf-8')

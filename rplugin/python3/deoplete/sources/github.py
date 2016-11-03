@@ -6,23 +6,26 @@ import urllib.request as request
 import json
 import base64
 
-def repo_homepage(vim):
+def repo_homepage(vim, context):
     """Return the repo homepage, akin to rhubarb#repo_request
     function
 
     :returns: String like "https://github.com/user/repo"
     """
 
-    repo_url = vim.eval('fugitive#repo().config("remote.origin.url")')
+    if 'deoplete_github_repo' in context['bufvars']:
+        repo_url = context['bufvars']['deoplete_github_repo']
+    else:
+        repo_url = vim.eval('fugitive#repo().config("remote.origin.url")')
     homepage = vim.call('rhubarb#homepage_for_url', repo_url)
     return homepage
 
-def repo_base(vim):
+def repo_base(vim, context):
     """
     :vim: Vim Object
     :returns: API endpoint for current repo
     """
-    base = repo_homepage(vim)
+    base = repo_homepage(vim, context)
     if base:
         if re.search('//github\.com/', base) is not None:
             base = base.replace('//github.com/', '//api.github.com/repos/')
@@ -67,7 +70,7 @@ class Source(Base):
         """Gather candidates from github API
         """
 
-        base = repo_base(self.vim)
+        base = repo_base(self.vim, context)
 
         if base:
             base = base + '/issues?per_page=200'

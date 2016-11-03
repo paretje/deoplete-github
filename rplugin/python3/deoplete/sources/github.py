@@ -64,21 +64,21 @@ class Source(Base):
         self.name = 'github'
         self.mark = '[GH]'
         self.filetypes = ['gitcommit']
-        self.input_pattern = '#\w+'
+        self.input_pattern = '#\w*'
+        self._cache = {}
 
-    def gather_candidates(self, context):
+    def on_event(self, context):
         """Gather candidates from github API
         """
 
-        base = repo_base(self.vim, context)
+        repo = repo_base(self.vim, context)
 
-        if base:
-            base = base + '/issues?per_page=200'
-
-            base_url = urlparse(base)
-            credentials = authenticator(base_url.hostname)
-
+        if repo and repo not in self._cache:
+            self._cache[repo] = []
+            base = repo + '/issues?per_page=200'
             r = request.Request(base)
+
+            credentials = authenticator(urlparse(base).hostname)
             if credentials is not None:
                 creds = base64.encodestring(bytes('%s:%s' % (credentials.get('login'), credentials.get('password')), 'utf-8')).strip()
                 r.add_header('Authorization', 'Basic %s' % creds.decode('utf-8'))
@@ -87,13 +87,20 @@ class Source(Base):
                 response_json = req.read().decode('utf-8')
                 response = json.loads(response_json)
 
-                numbers = [{'word': '#' + str(x.get('number', '')),
-                            'menu': x.get('title'),
-                            'info': x.get('body')}
-                        for x in response]
-                titles = [{'word': x.get('title'),
-                           'menu': '#' + str(x.get('number', '')),
-                           'info': x.get('body')}
-                           for x in response]
-                return numbers + titles
+                self._cache[repo] = [{'word': '#' + str(x.get('number', '')),
+                                      'menu': x.get('title'),
+                                      'info': x.get('body')}
+                                     for x in response]
+                self._cache[repo] += [{'word': x.get('title'),
+                                       'menu': '#' + str(x.get('number', '')),
+                                       'info': x.get('body')}
+                                      for x in response]
+
+    def gather_candidates(self, context):
+        """Gather candidates from cache
+        """
+
+        repo = repo_base(self.vim, context)
+        if repo in self._cache:
+            return self._cache[repo]
         return []
